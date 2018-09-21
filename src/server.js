@@ -42,30 +42,38 @@ app.post('/upload', upload.single('file'), function (req, res) {
 })
 
 app.post('/remove', urlencoded, function (req, res) {
-  const result = createDefaultJson()
-
-  if (req.body && req.body.id) {
-    const filepath = path.join(__dirname, '../uploads/', req.body.id)
-    fs.unlinkSync(filepath)
-
-    const isDeleted = !fs.existsSync(filepath)
-
-    if (isDeleted) {
-      db.get('files').remove({ id: req.body.id }).write()
+  const promise = new Promise(function (resolve, reject) {
+    if (req.body && req.body.id) {
+      const filepath = path.join(__dirname, '../uploads/', req.body.id)
+      fs.unlink(filepath, function (err) {
+        if (err) {
+          reject(err)
+        } else {
+          db.get('files').remove({ id: req.body.id }).write()
+          resolve(true)
+        }
+      })
+    } else {
+      reject(apiConstants.ERROR_PARAMS)
     }
-
-    result.response = isDeleted
-  } else {
-    result.error = apiConstants.ERROR_PARAMS
-  }
-
-  // console.log(req.body)
-  if (result.error) {
-    res.status(400)
-  }
+  })
 
   res.type('json')
-  res.json(result)
+  const json = createDefaultJson()
+
+  promise.then(
+    result => {
+      json.response = result
+
+      res.json(json)
+    },
+    error => {
+      json.error = error
+
+      res.status(400)
+      res.json(json)
+    }
+  )
 })
 
 const server = http.createServer(app)
