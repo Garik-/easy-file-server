@@ -40,6 +40,34 @@ app.post('/upload', (req, res) => {
 
   res.type('json')
   res.json(result)
+  // res.end()
+})
+
+app.post('/remove', (req, res) => {
+  const result = api.run(() => {
+    if (!req.fields || !req.fields.id) {
+      throw new Error(apiConstants.ERROR_PARAMS)
+    }
+
+    const filepath = path.join(__dirname, '../uploads/', req.fields.id)
+    fs.unlinkSync(filepath)
+
+    const isDeleted = !fs.existsSync(filepath)
+
+    if (isDeleted) {
+      db.get('files').remove({ id: req.fields.id }).write()
+    }
+
+    return isDeleted
+  })
+
+  if (result.errno) {
+    res.status(result.errno)
+  }
+
+  res.type('json')
+  res.json(result)
+  // res.end()
 })
 
 // Listen for incoming HTTP requests
