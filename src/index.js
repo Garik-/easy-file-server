@@ -25,6 +25,10 @@ app.post('/upload', (req, res) => {
     return true
   })
 
+  if (result.errno) {
+    res.status(result.errno)
+  }
+
   res.type('json')
   res.json(result)
 })
