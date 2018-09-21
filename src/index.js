@@ -5,8 +5,10 @@ const cors = require('cors')
 const path = require('path')
 const fs = require('fs')
 const { api, apiConstants } = require('./api')
-
+const db = require('./db')
 const app = express()
+
+const randomString = () => { return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15) }
 
 app.use(cors())
 app.use(formidable())
@@ -17,12 +19,19 @@ app.post('/upload', (req, res) => {
       throw new Error(apiConstants.ERROR_FILE)
     }
 
+    const file = {
+      id: randomString(),
+      name: req.files.file.name,
+      created: Date.now()
+    }
+
     const oldpath = req.files.file.path
-    const newpath = path.join(__dirname, '../uploads/', req.files.file.name)
+    const newpath = path.join(__dirname, '../uploads/', file.id)
 
     fs.renameSync(oldpath, newpath)
 
-    return true
+    db.get('files').push(file).write()
+    return file
   })
 
   if (result.errno) {

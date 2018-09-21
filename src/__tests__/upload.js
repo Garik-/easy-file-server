@@ -20,6 +20,7 @@ describe('Check file upload', () => {
 
   const filename = path.join(__dirname, '/1.zip')
   const filesize = getFilesizeInBytes(filename)
+  let uploadfile
 
   it(`upload: 1.zip`, async () => {
     const cmd = `curl -F "file=@${filename}" ${ENPOINT_UPLOAD}`
@@ -30,11 +31,14 @@ describe('Check file upload', () => {
 
     /* eslint-disable no-unused-expressions */
     expect(result[apiConstants.ERROR]).to.be.undefined
-    expect(result[apiConstants.RESPONSE]).to.be.true
+    expect(result[apiConstants.RESPONSE].name).to.equal('1.zip')
+    expect(result[apiConstants.RESPONSE].id).to.be.a('string')
+
+    uploadfile = result[apiConstants.RESPONSE].id
   })
 
   it(`check upload file size: ${filesize}`, () => {
-    const filename = path.join(__dirname, '../../uploads/1.zip')
+    const filename = path.join(__dirname, '../../uploads/', uploadfile)
     expect(filesize).to.equal(getFilesizeInBytes(filename))
   })
 
