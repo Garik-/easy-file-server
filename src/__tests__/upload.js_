@@ -49,7 +49,7 @@ describe('Check file upload', () => {
     expect(filesize).to.equal(getFilesizeInBytes(filename))
   })
 
-  it(`remove upload file`, async () => {
+/*   it(`remove upload file`, async () => {
     const cmd = `curl --header "Content-Type: application/json" --request POST --data '${JSON.stringify(file)}' ${ENDPOINT.REMOVE}`
     const result = await parse(cmd)
 
@@ -64,5 +64,5 @@ describe('Check file upload', () => {
     const cmd = `curl -F "test=123" ${ENDPOINT.UPLOAD}`
     const result = await parse(cmd)
     expect(result[apiConstants.ERROR]).to.equal(apiConstants.ERROR_FILE)
-  })
+  }) */
 })
