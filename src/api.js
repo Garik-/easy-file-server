@@ -13,32 +13,7 @@ const createDefaultJson = () => {
   return resObject
 }
 
-const isFunction = (functionToCheck) => {
-  return functionToCheck && {}.toString.call(functionToCheck) === '[object Function]'
-}
-
-const api = {
-  resObject: createDefaultJson(),
-  error: function (message, code = 400) {
-    this.resObject[apiConstants.ERROR] = message
-    this.resObject[apiConstants.ERRNO] = code
-  },
-  run: function (callback) {
-    if (isFunction(callback)) {
-      try {
-        this.resObject[apiConstants.RESPONSE] = callback()
-      } catch (e) {
-        this.error(e.message)
-      }
-    } else {
-      this.error(apiConstants.ERROR_REQUEST, 500)
-    }
-
-    return this.resObject
-  }
-}
-
 module.exports = {
-  api,
+  createDefaultJson,
   apiConstants
 }

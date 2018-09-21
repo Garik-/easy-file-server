@@ -9,13 +9,7 @@ const fs = require('fs')
 const upload = multer({ dest: 'uploads/' })
 const urlencoded = bodyParser.urlencoded({ extended: true })
 const db = require('./db')
-const { apiConstants } = require('./api')
-
-const createDefaultJson = () => {
-  const json = {}
-  json[apiConstants.RESPONSE] = {}
-  return json
-}
+const { apiConstants, createDefaultJson } = require('./api')
 
 app.set('port', process.env.PORT || 3000)
 
