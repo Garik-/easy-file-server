@@ -16,7 +16,6 @@ const ENDPOINT = {
 const { apiConstants } = require('../api')
 
 const curl = async (endpoint, params) => {
-
   let flag = '-F'
 
   if (params) {

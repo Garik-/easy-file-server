@@ -42,8 +42,8 @@
     "mocha": "--timeout 10000 --require scripts/mocha-bootload src/**/__tests__/*.js"
   },
   "scripts": {
-    "start": "node src/index.js",
-    "dev": "nodemon src/index.js",
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js",
     "lint": "eslint src",
     "lintfix": "eslint --fix src",
     "prettier": "prettier --write 'src/**/*.js'",

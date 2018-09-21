@@ -39,6 +39,10 @@ app.post('/upload', upload.single('file'), function (req, res) {
     result.response = file
   }
 
+  if (result.error) {
+    res.status(400)
+  }
+
   res.type('json')
   res.json(result)
 })
@@ -62,6 +66,9 @@ app.post('/remove', urlencoded, function (req, res) {
   }
 
   // console.log(req.body)
+  if (result.error) {
+    res.status(400)
+  }
 
   res.type('json')
   res.json(result)
