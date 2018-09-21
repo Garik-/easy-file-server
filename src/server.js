@@ -41,7 +41,7 @@ app.post('/upload', upload.single('file'), function (req, res) {
 app.post('/remove', urlencoded, function (req, res) {
   const promise = new Promise(function (resolve, reject) {
     if (req.body && req.body.id) {
-      const filepath = path.join(__dirname, '../uploads/', req.body.id)
+      const filepath = path.join(process.env.UPLOAD_DIR, req.body.id)
       fs.unlink(filepath, function (err) {
         if (err) {
           reject(err)
