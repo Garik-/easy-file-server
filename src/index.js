@@ -4,48 +4,12 @@ const formidable = require('express-formidable')
 const cors = require('cors')
 const path = require('path')
 const fs = require('fs')
+const { api } = require('./api')
 
 const app = express()
 
 app.use(cors())
 app.use(formidable())
-
-const ApiConstants = {
-  RESPONSE: 'response',
-  ERROR: 'error'
-}
-
-const createDefaultJson = () => {
-  const resObject = {}
-  resObject[ApiConstants.RESPONSE] = {}
-  return resObject
-}
-
-const isFunction = (functionToCheck) => {
-  return functionToCheck && {}.toString.call(functionToCheck) === '[object Function]'
-}
-
-class ApiEngine {
-  constructor () {
-    this.resObject = createDefaultJson()
-  }
-
-  run (callback_method) {
-    if (isFunction(callback_method)) {
-      try {
-        this.resObject[ApiConstants.RESPONSE] = callback_method()
-      } catch (e) {
-        this.resObject[ApiConstants.ERROR] = e.message
-      }
-    } else {
-      this.resObject[ApiConstants.ERROR] = 'Error in the server request'
-    }
-
-    return this.resObject
-  }
-}
-
-const api = new ApiEngine()
 
 app.post('/upload', (req, res) => {
   const result = api.run(() => {

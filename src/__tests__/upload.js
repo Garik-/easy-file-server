@@ -4,6 +4,7 @@ const fs = require('fs')
 const path = require('path')
 const util = require('util')
 const exec = util.promisify(require('child_process').exec)
+const { apiConstants } = require('../api')
 
 require('dotenv').config()
 
@@ -20,15 +21,14 @@ describe('Check file upload', () => {
   const filename = path.join(__dirname, '/1.zip')
 
   it(`upload: 1.zip`, async () => {
-    const fileSizeInBytes = getFilesizeInBytes(filename)
     const cmd = `curl -F "file=@${filename}" ${ENPOINT_UPLOAD}`
     const { stdout } = await exec(cmd)
 
     expect(stdout).to.be.a('string')
     const result = JSON.parse(stdout)
-    
-    expect(result.error).to.be.undefined
-    expect(result.response).to.be.true
+
+    expect(result[apiConstants.ERROR]).to.be.undefined
+    expect(result[apiConstants.RESPONSE]).to.be.true
   })
 
 /*   it(`Проверяем размер нашего и загруженного файла`, () => {
