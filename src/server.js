@@ -6,7 +6,7 @@ const bodyParser = require('body-parser')
 const multer = require('multer')
 const path = require('path')
 const fs = require('fs')
-const upload = multer({ dest: 'uploads/' })
+const upload = multer({ dest: process.env.UPLOAD_DIR })
 const urlencoded = bodyParser.urlencoded({ extended: true })
 const db = require('./db')
 const { apiConstants, createDefaultJson } = require('./api')
@@ -22,6 +22,7 @@ app.post('/upload', upload.single('file'), function (req, res) {
 
   const result = createDefaultJson()
   if (!req.file) {
+    res.status(400)
     result.error = apiConstants.ERROR_FILE
   } else {
     const file = {
@@ -31,10 +32,6 @@ app.post('/upload', upload.single('file'), function (req, res) {
 
     db.get('files').push(file).write()
     result.response = file
-  }
-
-  if (result.error) {
-    res.status(400)
   }
 
   res.type('json')

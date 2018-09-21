@@ -64,11 +64,11 @@ const checkServer = function (i) {
       expect(result[apiConstants.RESPONSE].id).to.be.a('string')
 
       file = result[apiConstants.RESPONSE]
+      file.path = path.join(__dirname, '../../', process.env.UPLOAD_DIR, file.id)
     })
 
     it(`check upload file size: ${filesize}`, () => {
-      const filename = path.join(__dirname, '../../uploads/', file.id)
-      expect(filesize).to.equal(getFilesizeInBytes(filename))
+      expect(filesize).to.equal(getFilesizeInBytes(file.path))
     })
 
     it(`no file`, async () => {
@@ -83,9 +83,7 @@ const checkServer = function (i) {
 
       expect(result[apiConstants.ERROR]).to.be.undefined
       expect(result[apiConstants.RESPONSE]).to.equal(true)
-
-      const filepath = path.join(__dirname, '../../uploads/', file.id)
-      expect(fs.existsSync(filepath)).to.be.false
+      expect(fs.existsSync(file.path)).to.be.false
     })
   })
 }
