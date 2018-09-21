@@ -1,6 +1,8 @@
 const apiConstants = {
   RESPONSE: 'response',
-  ERROR: 'error'
+  ERROR: 'error',
+  ERROR_REQUEST: 'Error in the server request',
+  ERROR_FILE: 'No file'
 }
 
 const createDefaultJson = () => {
@@ -23,7 +25,7 @@ const api = {
         this.resObject[apiConstants.ERROR] = e.message
       }
     } else {
-      this.resObject[apiConstants.ERROR] = 'Error in the server request'
+      this.resObject[apiConstants.ERROR] = apiConstants.ERROR_REQUEST
     }
 
     return this.resObject

@@ -19,6 +19,7 @@ describe('Check file upload', () => {
   }
 
   const filename = path.join(__dirname, '/1.zip')
+  const filesize = getFilesizeInBytes(filename)
 
   it(`upload: 1.zip`, async () => {
     const cmd = `curl -F "file=@${filename}" ${ENPOINT_UPLOAD}`
@@ -27,19 +28,25 @@ describe('Check file upload', () => {
     expect(stdout).to.be.a('string')
     const result = JSON.parse(stdout)
 
+    /* eslint-disable no-unused-expressions */
     expect(result[apiConstants.ERROR]).to.be.undefined
     expect(result[apiConstants.RESPONSE]).to.be.true
   })
 
-/*   it(`Проверяем размер нашего и загруженного файла`, () => {
-
+  it(`check upload file size: ${filesize}`, () => {
+    const filename = path.join(__dirname, '../../uploads/1.zip')
+    expect(filesize).to.equal(getFilesizeInBytes(filename))
   })
 
-  it(`Удаляем запись`, () => {
+  it('no file', async () => {
+    const cmd = `curl -F "test=123" ${ENPOINT_UPLOAD}`
+    const { stdout } = await exec(cmd)
 
+    expect(stdout).to.be.a('string')
+    const result = JSON.parse(stdout)
+    expect(result[apiConstants.ERROR]).to.equal(apiConstants.ERROR_FILE)
   })
 
-  it(`Проверяем есть ли файл на серваке`, () => {
-
-  }) */
+  // Удаляем запись
+  // Проверяем есть ли файл на серваке
 })

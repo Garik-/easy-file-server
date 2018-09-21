@@ -4,7 +4,7 @@ const formidable = require('express-formidable')
 const cors = require('cors')
 const path = require('path')
 const fs = require('fs')
-const { api } = require('./api')
+const { api, apiConstants } = require('./api')
 
 const app = express()
 
@@ -14,7 +14,7 @@ app.use(formidable())
 app.post('/upload', (req, res) => {
   const result = api.run(() => {
     if (!req.files || !req.files.file) {
-      throw new Error('No file')
+      throw new Error(apiConstants.ERROR_FILE)
     }
 
     const oldpath = req.files.file.path
