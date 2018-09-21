@@ -1,0 +1,54 @@
+{
+  "env": {
+    "es6": true,
+    "browser": true,
+    "node": true
+  },
+  "extends": [
+    "standard"
+  ],
+  "plugins": [
+    "prettier"
+  ],
+  "parserOptions": {
+    "ecmaFeatures": {
+      "jsx": true
+    },
+    "arrowFunctions": true,
+    "binaryLiterals": true,
+    "blockBindings": true,
+    "classes": true,
+    "defaultParams": true,
+    "destructuring": true,
+    "experimentalObjectRestSpread": true,
+    "forOf": true,
+    "generators": true,
+    "globalReturn": true,
+    "jsx": true,
+    "modules": true,
+    "objectLiteralComputedProperties": true,
+    "objectLiteralDuplicateProperties": true,
+    "objectLiteralShorthandMethods": true,
+    "objectLiteralShorthandProperties": true,
+    "octalLiterals": true,
+    "regexUFlag": true,
+    "regexYFlag": true,
+    "restParams": true,
+    "spread": true,
+    "superInFunctions": true,
+    "templateStrings": true,
+    "unicodeCodePointEscapes": true
+  },
+  "rules": {
+    "no-undef": 1,
+    "no-unused-vars": 1,
+    "space-before-function-paren": 2,
+    "camelcase": 0,
+    "eol-last": 1,
+    "no-multiple-empty-lines": 1,
+    "comma-dangle": 1,
+    "quotes": [2, "single", { "avoidEscape": true, "allowTemplateLiterals": true }],
+    "jsx-quotes": [2, "prefer-single"],
+    "no-useless-escape": 0
+  }
+}
