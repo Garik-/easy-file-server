@@ -38,7 +38,7 @@
     "prettier": "^1.11.1"
   },
   "options": {
-    "mocha": "--timeout 10000 --require scripts/mocha-bootload src/**/__tests__/*.js"
+    "mocha": "--timeout 10000 --require scripts/mocha-bootload __tests__/*.js"
   },
   "scripts": {
     "start": "node src/server.js",

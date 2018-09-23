@@ -13,7 +13,7 @@ const ENDPOINT = {
   REMOVE: `${SERVER}/remove/`
 }
 
-const { apiConstants } = require('../api')
+const { apiConstants } = require('./../src/api')
 
 const curl = async (endpoint, params) => {
   let flag = '-F'
@@ -36,7 +36,7 @@ const curl = async (endpoint, params) => {
     const json = JSON.parse(stdout)
     return json
   } catch (e) {
-    // console.log(stdout)
+    console.log(stdout)
     throw e
   }
 }
@@ -64,7 +64,7 @@ const checkServer = function (i) {
       expect(result[apiConstants.RESPONSE].id).to.be.a('string')
 
       file = result[apiConstants.RESPONSE]
-      file.path = path.join(__dirname, '../../', process.env.UPLOAD_DIR, file.id)
+      file.path = path.join(__dirname, '../', process.env.UPLOAD_DIR, file.id)
     })
 
     it(`check upload file size: ${filesize}`, () => {

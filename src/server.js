@@ -11,7 +11,7 @@ const urlencoded = bodyParser.urlencoded({ extended: true })
 const db = require('./db')
 const { apiConstants, createDefaultJson } = require('./api')
 
-app.set('port', process.env.PORT || 3000)
+app.set('port', process.env.PORT || 5000)
 
 // app.use(bodyParser.json())
 // app.use(bodyParser.urlencoded({ extended: true }))
@@ -71,6 +71,11 @@ app.post('/remove', urlencoded, function (req, res) {
       res.json(json)
     }
   )
+})
+
+app.get('/list', function (req, res) {
+  res.type('json')
+  res.json(db.getState())
 })
 
 const server = http.createServer(app)
