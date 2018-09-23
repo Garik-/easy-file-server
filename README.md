@@ -12,3 +12,9 @@ $ curl -X POST -F "file=@FILE_NAME" [UPLOAD]
 # Remove file
 $ curl -X POST -d "id=FILE_ID" [REMOVE]
 ```
+
+## Docker
+```SH
+docker build -t garik:fs .
+docker run -d --name fs -p 5000:5000 --env-file ./.env.example garik:fs
+```
