@@ -6,7 +6,7 @@ WORKDIR /app
 # ---- Зависимости ----
 FROM base AS dependencies  
 # Используется символ подстановки для копирования как package.json, так и package-lock.json
-COPY src/package*.json ./
+COPY package*.json ./
 # Установить зависимости приложения, включая предназначенные для разработки ('devDependencies')
 RUN npm install
 
