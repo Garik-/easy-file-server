@@ -16,7 +16,7 @@ app.set('port', process.env.PORT || 5000)
 // app.use(bodyParser.json())
 // app.use(bodyParser.urlencoded({ extended: true }))
 
-app.post('/upload', upload.single('file'), function (req, res) {
+app.post('/api/upload', upload.single('file'), function (req, res) {
   // req.file is the `file` file
   // req.body will hold the text fields, if there were any
 
@@ -38,7 +38,7 @@ app.post('/upload', upload.single('file'), function (req, res) {
   res.json(result)
 })
 
-app.post('/remove', urlencoded, function (req, res) {
+app.post('/api/remove', urlencoded, function (req, res) {
   const promise = new Promise(function (resolve, reject) {
     if (req.body && req.body.id) {
       const filepath = path.join(process.env.UPLOAD_DIR, req.body.id)
@@ -73,7 +73,7 @@ app.post('/remove', urlencoded, function (req, res) {
   )
 })
 
-app.get('/list', function (req, res) {
+app.get('/api/list', function (req, res) {
   res.type('json')
   res.json(db.getState())
 })

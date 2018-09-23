@@ -9,8 +9,8 @@ const fs = require('fs')
 
 const SERVER = `http://localhost:${process.env.PORT}`
 const ENDPOINT = {
-  UPLOAD: `${SERVER}/upload/`,
-  REMOVE: `${SERVER}/remove/`
+  UPLOAD: `${SERVER}/api/upload/`,
+  REMOVE: `${SERVER}/api/remove/`
 }
 
 const { apiConstants } = require('./../src/api')
