@@ -69,6 +69,75 @@ app.post('/api/upload', upload.single('file'), function (req, res) {
   )
 })
 
+// Обновление файла
+app.post('/api/update', upload.single('file'), function (req, res) {
+  const promise = new Promise(function (resolve, reject) {
+    if (!req.file) {
+      reject(apiConstants.ERROR_FILE)
+    }
+
+    if (!req.body.id) {
+      reject(apiConstants.ERROR_PARAMS)
+    }
+
+    const file = db.get('files').find({ id: req.body.id }).value()
+
+    if (!file) {
+      reject(apiConstants.ERROR_FILE)
+    }
+
+    const PATH = {
+      file: path.join(process.env.UPLOAD_DIR, file.id),
+      new: path.join(process.env.UPLOAD_DIR, req.file.filename),
+      dest: path.join(process.env.UNPACK_DIR, file.slug)
+    }
+
+    fs.unlink(PATH.file, function (err) {
+      if (err) {
+        reject(err)
+      } else {
+        // заменяем загруженный
+        fs.rename(PATH.new, PATH.file, (err) => {
+          if (err) {
+            reject(err)
+          } else {
+            rimraf(PATH.dest, function (err) { // удаляем старую директорию
+              if (err) {
+                reject(err)
+              } else {
+                const stream = fs.createReadStream(PATH.file).pipe(unzip.Extract({ path: PATH.dest })) // распаковываем новый файл
+                stream.on('close', () => {
+                  file.name = req.file.originalname
+                  db.get('posts').find({ id: file.id }).assign({ name: file.name }).write()
+                  resolve(file)
+                })
+                stream.on('error', err => reject(err))
+              }
+            })
+          }
+        })
+      }
+    })
+  })
+
+  res.type('json')
+  const json = createDefaultJson()
+
+  promise.then(
+    result => {
+      json.response = result
+
+      res.json(json)
+    },
+    error => {
+      json.error = error
+
+      res.status(400)
+      res.json(json)
+    }
+  )
+})
+
 // Удаление файла и записи
 app.post('/api/remove', function (req, res) {
   const promise = new Promise(function (resolve, reject) {

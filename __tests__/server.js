@@ -11,7 +11,8 @@ const SERVER = `http://localhost:${process.env.PORT}`
 const ENDPOINT = {
   UPLOAD: `${SERVER}/api/upload/`,
   REMOVE: `${SERVER}/api/remove/`,
-  SLUG: `${SERVER}/api/slug/`
+  SLUG: `${SERVER}/api/slug/`,
+  UPDATE: `${SERVER}/api/update/`
 }
 
 const { apiConstants } = require('./../src/api')
@@ -56,6 +57,12 @@ const filesize = getFilesizeInBytes(filename)
 const fileimage = path.join(__dirname, '/img.jpg')
 const imagesize = getFilesizeInBytes(fileimage)
 
+const filename2 = path.join(__dirname, '/img2.zip')
+const filesize2 = getFilesizeInBytes(filename2)
+
+const fileimage2 = path.join(__dirname, '/img2.jpg')
+const imagesize2 = getFilesizeInBytes(fileimage2)
+
 const checkServer = function (i) {
   describe(`Check file upload #${i + 1}`, () => {
     let file
@@ -84,6 +91,35 @@ const checkServer = function (i) {
       expect(imagesize).to.equal(getFilesizeInBytes(file.unpack))
     })
 
+    it(`update: 2.zip`, async () => {
+      const result = await curl(ENDPOINT.UPDATE, { file: '@' + filename2, id: file.id })
+
+      expect(result[apiConstants.ERROR]).to.be.undefined
+      expect(result[apiConstants.RESPONSE].name).to.equal('img2.zip')
+      expect(result[apiConstants.RESPONSE].slug).to.equal(file.slug)
+      expect(result[apiConstants.RESPONSE].id).to.equal(file.id)
+
+      file.unpack = path.join(__dirname, '../', process.env.UNPACK_DIR, file.slug, '/img2.jpg')
+    })
+
+    it(`check update file size: ${filesize2}`, () => {
+      expect(filesize2).to.equal(getFilesizeInBytes(file.path))
+    })
+
+    it(`check update file size: ${imagesize2}`, () => {
+      expect(imagesize2).to.equal(getFilesizeInBytes(file.unpack))
+    })
+
+    it(`remove file`, async () => {
+      const result = await curl(ENDPOINT.REMOVE, { id: file.id })
+
+      expect(result[apiConstants.ERROR]).to.be.undefined
+      expect(result[apiConstants.RESPONSE]).to.equal(true)
+      expect(fs.existsSync(file.path)).to.be.false
+    })
+  })
+
+  describe(`Check errors #${i + 1}`, () => {
     it(`no file`, async () => {
       const result = await curl(ENDPOINT.UPLOAD, { test: randomString() })
       // // console.log(result)
@@ -91,19 +127,11 @@ const checkServer = function (i) {
       expect(result[apiConstants.ERROR]).to.equal(apiConstants.ERROR_FILE)
     })
 
-    it('no exist', async () => {
+    it('slug no exists', async () => {
       const result = await curl(ENDPOINT.SLUG, { slug: randomString() })
 
       expect(result[apiConstants.ERROR]).to.be.undefined
       expect(result[apiConstants.RESPONSE].exist).to.be.false
-    })
-
-    it(`remove upload file`, async () => {
-      const result = await curl(ENDPOINT.REMOVE, { id: file.id })
-
-      expect(result[apiConstants.ERROR]).to.be.undefined
-      expect(result[apiConstants.RESPONSE]).to.equal(true)
-      expect(fs.existsSync(file.path)).to.be.false
     })
   })
 }
