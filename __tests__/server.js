@@ -53,6 +53,9 @@ function getFilesizeInBytes (filename) {
 const filename = path.join(__dirname, '/img.zip')
 const filesize = getFilesizeInBytes(filename)
 
+const fileimage = path.join(__dirname, '/img.jpg')
+const imagesize = getFilesizeInBytes(fileimage)
+
 const checkServer = function (i) {
   describe(`Check file upload #${i + 1}`, () => {
     let file
@@ -66,20 +69,20 @@ const checkServer = function (i) {
       expect(result[apiConstants.ERROR]).to.be.undefined
       expect(result[apiConstants.RESPONSE].name).to.equal('img.zip')
       expect(result[apiConstants.RESPONSE].id).to.be.a('string')
-      // expect(result[apiConstants.RESPONSE].slug).to.equal(slug)
+      expect(result[apiConstants.RESPONSE].slug).to.equal(slug)
 
       file = result[apiConstants.RESPONSE]
       file.path = path.join(__dirname, '../', process.env.UPLOAD_DIR, file.id)
-      // file.unpack = path.join(__dirname, '../', process.env.UNPACK_DIR, file.slug, '/img.jpg')
+      file.unpack = path.join(__dirname, '../', process.env.UNPACK_DIR, file.slug, '/img.jpg')
     })
 
     it(`check upload file size: ${filesize}`, () => {
       expect(filesize).to.equal(getFilesizeInBytes(file.path))
     })
 
-    /*  it(`check unpack file size: ${filesize}`, () => {
+    it(`check unpack file size: ${imagesize}`, () => {
       expect(imagesize).to.equal(getFilesizeInBytes(file.unpack))
-    }) */
+    })
 
     it(`no file`, async () => {
       const result = await curl(ENDPOINT.UPLOAD, { test: randomString() })
