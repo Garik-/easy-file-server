@@ -16,16 +16,19 @@ $ curl -X POST -F "slug=DIR_NAME" [SLUG]
 # Get DB
 $ curl [LIST]
 ```
-### Params
-- **FILE_NAME** - path to zip file
-- **FILE_ID** - id from response
-- **DIR_NAME** - directory on the server for unpacking
-### Endpoints
-- **[UPLOAD]** - POST /api/upload/
-- **[UPDATE]** - POST /api/update/
-- **[REMOVE]** - POST /api/remove/
-- **[SLUG]** - POST /api/slug/
-- **[LIST]** - GET /api/list/
+| Param | Description |
+| --- | --- |
+| **FILE_NAME** | path to zip file |
+| **FILE_ID** | id from response |
+| **DIR_NAME** | directory on the server for unpacking |
+
+| Endpoint | Type | URL |
+| --- | :---:  | --- |
+| **UPLOAD** | POST | /api/upload/ |
+| **UPDATE** | POST | /api/update/ |
+| **REMOVE** | POST | /api/remove/ |
+| **SLUG** | POST | /api/slug/ |
+| **LIST** | GET | /api/list/ |
 ## Docker
 https://github.com/Garik-/docker-file-server
 ```SH
