@@ -7,24 +7,27 @@ const multer = require('multer')
 const path = require('path')
 const fs = require('fs')
 const upload = multer({ dest: process.env.UPLOAD_DIR })
-const urlencoded = bodyParser.urlencoded({ extended: true })
+// const urlencoded = bodyParser.urlencoded({ extended: true })
 const db = require('./db')
 const { apiConstants, createDefaultJson } = require('./api')
 
 app.set('port', process.env.PORT || 5000)
 
 // app.use(bodyParser.json())
-// app.use(bodyParser.urlencoded({ extended: true }))
+app.use(bodyParser.urlencoded({ extended: true }))
 
+// Загрузка файла и создание записи
 app.post('/api/upload', upload.single('file'), function (req, res) {
   // req.file is the `file` file
   // req.body will hold the text fields, if there were any
 
   const result = createDefaultJson()
-  if (!req.file) {
+  if (!req.file || !req.body.slug) {
     res.status(400)
     result.error = apiConstants.ERROR_FILE
   } else {
+    console.log(req.body.slug)
+
     const file = {
       id: req.file.filename,
       name: req.file.originalname
@@ -38,7 +41,8 @@ app.post('/api/upload', upload.single('file'), function (req, res) {
   res.json(result)
 })
 
-app.post('/api/remove', urlencoded, function (req, res) {
+// Удаление файла и записи
+app.post('/api/remove', function (req, res) {
   const promise = new Promise(function (resolve, reject) {
     if (req.body && req.body.id) {
       const filepath = path.join(process.env.UPLOAD_DIR, req.body.id)
@@ -73,9 +77,41 @@ app.post('/api/remove', urlencoded, function (req, res) {
   )
 })
 
+// Запрашиваем список файлов из базы для отладки
 app.get('/api/list', function (req, res) {
   res.type('json')
   res.json(db.getState())
+})
+
+// Проверяем существует ли директория по имени slug
+app.post('/api/slug', function (req, res) {
+  const promise = new Promise(function (resolve, reject) {
+    if (req.body && req.body.slug) {
+      const filepath = path.join(process.env.UNPACK_DIR, req.body.slug)
+      fs.access(filepath, fs.constants.F_OK, (err) => {
+        resolve({ exist: err ? false : true })
+      })
+    } else {
+      reject(apiConstants.ERROR_PARAMS)
+    }
+  })
+
+  res.type('json')
+  const json = createDefaultJson()
+
+  promise.then(
+    result => {
+      json.response = result
+
+      res.json(json)
+    },
+    error => {
+      json.error = error
+
+      res.status(400)
+      res.json(json)
+    }
+  )
 })
 
 const server = http.createServer(app)

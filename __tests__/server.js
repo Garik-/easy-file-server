@@ -10,25 +10,28 @@ const fs = require('fs')
 const SERVER = `http://localhost:${process.env.PORT}`
 const ENDPOINT = {
   UPLOAD: `${SERVER}/api/upload/`,
-  REMOVE: `${SERVER}/api/remove/`
+  REMOVE: `${SERVER}/api/remove/`,
+  SLUG: `${SERVER}/api/slug/`
 }
 
 const { apiConstants } = require('./../src/api')
 
+const randomString = () => Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15)
+
 const curl = async (endpoint, params) => {
-  let flag = '-F'
-
   if (params) {
-    params = querystring.stringify(params)
-    params = params.replace('%40', '@')
-    params = params.replace(/%2F/g, '/')
-
-    if (!/@/.test(params)) {
-      flag = '-d'
+    if (params.file) {
+      let fields = []
+      for (let name in params) {
+        fields.push(`--form ${name}=${params[name]}`)
+      }
+      params = fields.join(' ')
+    } else {
+      params = `-X POST -d "${querystring.stringify(params)}"`
     }
   }
-
-  const { stdout } = await exec(`curl -X POST ${params ? ` ${flag} "${params}"` : null} ${endpoint}`)
+  // console.log(`curl ${params} ${endpoint}`)
+  const { stdout } = await exec(`curl -X POST ${params} ${endpoint}`)
 
   expect(stdout).to.be.a('string')
 
@@ -47,7 +50,7 @@ function getFilesizeInBytes (filename) {
   return fileSizeInBytes
 }
 
-const filename = path.join(__dirname, '/1.zip')
+const filename = path.join(__dirname, '/img.zip')
 const filesize = getFilesizeInBytes(filename)
 
 const checkServer = function (i) {
@@ -55,27 +58,41 @@ const checkServer = function (i) {
     let file
 
     it(`upload: 1.zip`, async () => {
-      const result = await curl(ENDPOINT.UPLOAD, { file: '@' + filename })
+      const slug = randomString()
+      const result = await curl(ENDPOINT.UPLOAD, { file: '@' + filename, slug })
       // console.log(result)
 
       /* eslint-disable no-unused-expressions */
       expect(result[apiConstants.ERROR]).to.be.undefined
-      expect(result[apiConstants.RESPONSE].name).to.equal('1.zip')
+      expect(result[apiConstants.RESPONSE].name).to.equal('img.zip')
       expect(result[apiConstants.RESPONSE].id).to.be.a('string')
+      // expect(result[apiConstants.RESPONSE].slug).to.equal(slug)
 
       file = result[apiConstants.RESPONSE]
       file.path = path.join(__dirname, '../', process.env.UPLOAD_DIR, file.id)
+      // file.unpack = path.join(__dirname, '../', process.env.UNPACK_DIR, file.slug, '/img.jpg')
     })
 
     it(`check upload file size: ${filesize}`, () => {
       expect(filesize).to.equal(getFilesizeInBytes(file.path))
     })
 
+    /*  it(`check unpack file size: ${filesize}`, () => {
+      expect(imagesize).to.equal(getFilesizeInBytes(file.unpack))
+    }) */
+
     it(`no file`, async () => {
-      const result = await curl(ENDPOINT.UPLOAD, { test: 123 })
+      const result = await curl(ENDPOINT.UPLOAD, { test: randomString() })
       // // console.log(result)
 
       expect(result[apiConstants.ERROR]).to.equal(apiConstants.ERROR_FILE)
+    })
+
+    it('no exist', async () => {
+      const result = await curl(ENDPOINT.SLUG, { slug: randomString() })
+
+      expect(result[apiConstants.ERROR]).to.be.undefined
+      expect(result[apiConstants.RESPONSE].exist).to.be.false
     })
 
     it(`remove upload file`, async () => {
