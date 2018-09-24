@@ -7,6 +7,9 @@ const multer = require('multer')
 const path = require('path')
 const fs = require('fs')
 const upload = multer({ dest: process.env.UPLOAD_DIR })
+const { exec } = require('child_process')
+const rimraf = require('rimraf')
+
 // const urlencoded = bodyParser.urlencoded({ extended: true })
 const db = require('./db')
 const { apiConstants, createDefaultJson } = require('./api')
@@ -18,42 +21,92 @@ app.use(bodyParser.urlencoded({ extended: true }))
 
 // Загрузка файла и создание записи
 app.post('/api/upload', upload.single('file'), function (req, res) {
-  // req.file is the `file` file
-  // req.body will hold the text fields, if there were any
+  const promise = new Promise(function (resolve, reject) {
+    if (!req.file) {
+      reject(apiConstants.ERROR_FILE)
+    }
 
-  const result = createDefaultJson()
-  if (!req.file || !req.body.slug) {
-    res.status(400)
-    result.error = apiConstants.ERROR_FILE
-  } else {
-    console.log(req.body.slug)
+    if (!req.body.slug) {
+      reject(apiConstants.ERROR_PARAMS)
+    }
 
     const file = {
       id: req.file.filename,
-      name: req.file.originalname
+      name: req.file.originalname,
+      slug: req.body.slug
     }
 
-    db.get('files').push(file).write()
-    result.response = file
-  }
+    const PATH = {
+      file: path.join(process.env.UPLOAD_DIR, file.id),
+      dest: path.join(process.env.UNPACK_DIR, file.slug)
+    }
+
+    // console.log(`unzip ${PATH.file} -d ${PATH.dest}`)
+    // TODO: обязательна нужна директория unpack
+
+    exec(`unzip ${PATH.file} -d ${PATH.dest}`, (error, stdout, stderr) => {
+      if (error) {
+        reject(error)
+      }
+
+      if (stderr) {
+        reject(error)
+      }
+
+      db.get('files').push(file).write()
+      resolve(file)
+    })
+  })
 
   res.type('json')
-  res.json(result)
+  const json = createDefaultJson()
+
+  promise.then(
+    result => {
+      json.response = result
+
+      res.json(json)
+    },
+    error => {
+      json.error = error
+
+      res.status(400)
+      res.json(json)
+    }
+  )
 })
 
 // Удаление файла и записи
 app.post('/api/remove', function (req, res) {
   const promise = new Promise(function (resolve, reject) {
     if (req.body && req.body.id) {
-      const filepath = path.join(process.env.UPLOAD_DIR, req.body.id)
-      fs.unlink(filepath, function (err) {
-        if (err) {
-          reject(err)
-        } else {
-          db.get('files').remove({ id: req.body.id }).write()
-          resolve(true)
+      const file = db.get('files').find({ id: req.body.id }).value()
+      // console.log(file)
+      if (!file) {
+        reject(apiConstants.ERROR_FILE)
+      } else {
+        const PATH = {
+          upload: path.join(process.env.UPLOAD_DIR, file.id),
+          unpack: path.join(process.env.UNPACK_DIR, file.slug)
         }
-      })
+
+        // console.log(PATH)
+
+        fs.unlink(PATH.upload, function (err) {
+          if (err) {
+            reject(err)
+          } else {
+            rimraf(PATH.unpack, function (err) {
+              if (err) {
+                reject(err)
+              } else {
+                db.get('files').remove({ id: file.id }).write()
+                resolve(true)
+              }
+            })
+          }
+        })
+      }
     } else {
       reject(apiConstants.ERROR_PARAMS)
     }
@@ -89,7 +142,7 @@ app.post('/api/slug', function (req, res) {
     if (req.body && req.body.slug) {
       const filepath = path.join(process.env.UNPACK_DIR, req.body.slug)
       fs.access(filepath, fs.constants.F_OK, (err) => {
-        resolve({ exist: err ? false : true })
+        resolve({ exist: !err })
       })
     } else {
       reject(apiConstants.ERROR_PARAMS)

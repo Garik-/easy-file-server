@@ -21,5 +21,6 @@ secrets.json
 package-lock.json
 yarn.lock
 
-/uploads
+/uploads/*
+/unpack/*
 db.json
