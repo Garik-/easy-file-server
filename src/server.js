@@ -7,8 +7,8 @@ const multer = require('multer')
 const path = require('path')
 const fs = require('fs')
 const upload = multer({ dest: process.env.UPLOAD_DIR })
-const { exec } = require('child_process')
 const rimraf = require('rimraf')
+const unzip = require('unzip')
 
 // const urlencoded = bodyParser.urlencoded({ extended: true })
 const db = require('./db')
@@ -43,19 +43,12 @@ app.post('/api/upload', upload.single('file'), function (req, res) {
 
     // console.log(`unzip ${PATH.file} -d ${PATH.dest}`)
     // TODO: обязательна нужна директория unpack
-
-    exec(`unzip ${PATH.file} -d ${PATH.dest}`, (error, stdout, stderr) => {
-      if (error) {
-        reject(error)
-      }
-
-      if (stderr) {
-        reject(error)
-      }
-
+    const stream = fs.createReadStream(PATH.file).pipe(unzip.Extract({ path: PATH.dest }))
+    stream.on('close', () => {
       db.get('files').push(file).write()
       resolve(file)
     })
+    stream.on('error', err => reject(err))
   })
 
   res.type('json')
