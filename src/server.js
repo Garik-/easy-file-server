@@ -9,13 +9,14 @@ const fs = require('fs')
 const upload = multer({ dest: process.env.UPLOAD_DIR })
 const rimraf = require('rimraf')
 const unzip = require('unzip')
+const cors = require('cors')
 
 // const urlencoded = bodyParser.urlencoded({ extended: true })
 const db = require('./db')
 const { apiConstants, createDefaultJson } = require('./api')
 
 app.set('port', process.env.PORT || 5000)
-
+app.use(cors())
 // app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: true }))
 
